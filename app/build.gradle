@@ -34,6 +34,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-ml-vision-face-model:20.0.0'
     implementation 'com.wonderkiln:camerakit:0.13.4'
     implementation 'com.github.d-max:spots-dialog:1.1@aar'
+    implementation 'io.fotoapparat.fotoapparat:library:2.2.0'
+
+    implementation "com.tbruyelle.rxpermissions2:rxpermissions:0.9.5@aar"
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.8'
+
+    
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
