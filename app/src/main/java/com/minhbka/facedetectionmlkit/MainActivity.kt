@@ -3,6 +3,7 @@ package com.minhbka.facedetectionmlkit
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.minhbka.facedetectionmlkit.detector.SimpleFaceDetector
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
             lensPosition = front(),
             cameraConfiguration = cameraConfiguration)
         requestPermissions()
+        resultsGroup.visibility = View.GONE
     }
 
     override fun onResume() {
@@ -59,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         }
         changeCameraButton.setOnClickListener {
             val camera = if (isUsingFrontCamera) back() else front()
-            foto.switchTo(camera, CameraConfiguration.default())
+            foto.switchTo(camera, cameraConfiguration)
             isUsingFrontCamera = !isUsingFrontCamera
         }
 
@@ -73,6 +75,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onProcessed(bitmapWithFace: Bitmap){
+        Log.d(TAG, "onProcessed")
         resultView.setImageBitmap(bitmapWithFace)
         resultsGroup.visibility = View.VISIBLE
     }
