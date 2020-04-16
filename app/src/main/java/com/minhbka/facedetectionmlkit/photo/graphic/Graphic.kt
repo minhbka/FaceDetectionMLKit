@@ -1,4 +1,4 @@
-package com.minhbka.facedetectionmlkit.graphic
+package com.minhbka.facedetectionmlkit.photo.graphic
 
 import android.graphics.Bitmap
 import com.google.firebase.ml.vision.face.FirebaseVisionFace

@@ -1,4 +1,4 @@
-package com.minhbka.facedetectionmlkit
+package com.minhbka.facedetectionmlkit.common
 
 
 enum class CameraDirection(val value: Int) {

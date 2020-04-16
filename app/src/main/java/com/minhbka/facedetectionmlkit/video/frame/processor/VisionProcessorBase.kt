@@ -1,0 +1,109 @@
+package com.minhbka.facedetectionmlkit.video.frame.processor
+
+import android.graphics.Bitmap
+import com.google.android.gms.tasks.Task
+import com.google.firebase.ml.vision.common.FirebaseVisionImage
+import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
+import com.minhbka.facedetectionmlkit.common.BitmapUtils
+import com.minhbka.facedetectionmlkit.common.FrameMetadata
+import com.minhbka.facedetectionmlkit.video.GraphicOverlayView
+import java.nio.ByteBuffer
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+
+abstract class VisionProcessorBase<T>:VisionImageProcessor {
+    private var previousResults: T? = null
+    private var busy = AtomicBoolean(false)
+    private var droppedFrameCount = AtomicInteger(0)
+    val droppedFrames get() = droppedFrameCount
+
+    override fun process(
+        data: ByteBuffer,
+        frameMetadata: FrameMetadata,
+        graphicOverlayView: GraphicOverlayView
+    ) {
+        processImage(data, frameMetadata, graphicOverlayView)
+    }
+    // Bitmap version
+    override fun process(bitmap: Bitmap, graphicOverlayView: GraphicOverlayView) {
+        detectInVisionImage(
+            null, /* bitmap */
+            FirebaseVisionImage.fromBitmap(bitmap),
+            null,
+            graphicOverlayView
+        )
+    }
+
+    private fun processImage(data: ByteBuffer, frameMetadata: FrameMetadata, graphicOverlayView: GraphicOverlayView) {
+        val metadata = FirebaseVisionImageMetadata.Builder()
+            .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21)
+            .setWidth(frameMetadata.width)
+            .setHeight(frameMetadata.height)
+            .setRotation(frameMetadata.rotation)
+            .build()
+        val bitmap = BitmapUtils.getBitmap(data, frameMetadata)
+        detectInVisionImage(
+            bitmap,
+            FirebaseVisionImage.fromByteBuffer(data, metadata), frameMetadata,
+            graphicOverlayView
+        )
+    }
+
+    private fun detectInVisionImage(originalCameraImage: Bitmap?, image: FirebaseVisionImage, metadata: FrameMetadata?, graphicOverlayView: GraphicOverlayView) {
+        if (busy.get()) {
+            droppedFrameCount.incrementAndGet()
+            onSuccess(
+                originalCameraImage,
+                previousResults,
+                metadata!!,
+                graphicOverlayView
+            )
+            return
+        }
+        busy.set(true)
+        droppedFrameCount.set(0)
+
+        detectInImage(image)
+            .addOnSuccessListener { results ->
+                previousResults = results
+                onSuccess(
+                    originalCameraImage,
+                    results,
+                    metadata!!,
+                    graphicOverlayView
+                )
+            }
+            .addOnFailureListener { e -> onFailure(e) }
+            .addOnCompleteListener {
+                // For testing dropped frame functionality
+                // Thread(Runnable {
+                //    Thread.sleep(2000)
+                //    busy.set(false)
+                // }).start()
+                busy.set(false)
+            }
+
+    }
+
+    override fun stop() {}
+    protected abstract fun detectInImage(image: FirebaseVisionImage): Task<T>
+
+    /**
+     * Callback that executes with a successful detection result.
+     *
+     * @param originalCameraImage hold the original image from camera, used to draw the background
+     * image.
+     */
+    protected abstract fun onSuccess(
+        originalCameraImage: Bitmap?,
+        results: T?,
+        frameMetadata: FrameMetadata,
+        graphicOverlayView: GraphicOverlayView
+    )
+
+    protected abstract fun onFailure(e: Exception)
+
+    companion object{
+        private const val TAG = "VisionsProcessorBase"
+    }
+}

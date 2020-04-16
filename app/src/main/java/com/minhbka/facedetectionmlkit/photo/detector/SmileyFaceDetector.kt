@@ -1,4 +1,4 @@
-package com.minhbka.facedetectionmlkit.detector
+package com.minhbka.facedetectionmlkit.photo.detector
 
 import android.graphics.Bitmap
 import android.util.Log
@@ -8,10 +8,13 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions.FAST
-import com.minhbka.facedetectionmlkit.CameraDirection
-import com.minhbka.facedetectionmlkit.graphic.SmileyFaceGraphic
-private const val TAG = "SmileyFaceDetector"
+import com.minhbka.facedetectionmlkit.common.CameraDirection
+import com.minhbka.facedetectionmlkit.photo.graphic.SmileyFaceGraphic
+
 class SmileyFaceDetector:FaceDetector{
+    companion object{
+        private const val TAG = "SmileyFaceDetector"
+    }
 
     private val options = FirebaseVisionFaceDetectorOptions.Builder()
         .setPerformanceMode(FAST)
@@ -29,7 +32,7 @@ class SmileyFaceDetector:FaceDetector{
                 callback(bitmapWithFaces)
             }
             .addOnFailureListener {e->
-                Log.e("TAG", "$e")
+                Log.e(TAG, "$e")
             }
     }
 

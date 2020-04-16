@@ -1,4 +1,4 @@
-package com.minhbka.facedetectionmlkit.graphic
+package com.minhbka.facedetectionmlkit.photo.graphic
 
 import android.content.res.Resources
 import android.graphics.Bitmap
