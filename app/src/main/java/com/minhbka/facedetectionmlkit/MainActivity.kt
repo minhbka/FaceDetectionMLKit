@@ -23,7 +23,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var rxPermissions: RxPermissions
     private lateinit var disposable: Disposable
     private lateinit var foto:Fotoapparat
-    private var isUsingFrontCamera = true
+    //private var isUsingFrontCamera = true
+    private var cameraDirection = CameraDirection.FRONT
     private lateinit var detection : FaceDetector
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,8 +38,8 @@ class MainActivity : AppCompatActivity() {
             lensPosition = front(),
             cameraConfiguration = cameraConfiguration)
         requestPermissions()
-        detection = SmileyFaceDetector()
-        //detection = SimpleFaceDetector(resources)
+        //detection = SmileyFaceDetector()
+        detection = SimpleFaceDetector(this)
         resultsGroup.visibility = View.GONE
     }
 
@@ -59,14 +60,19 @@ class MainActivity : AppCompatActivity() {
                 .transform { it.rotate() }
                 .whenAvailable {photo->
                     photo?.let {bitmap->
-                        detection.process(bitmap, ::onProcessed)
+                        detection.process(bitmap, ::onProcessed, cameraDirection)
                     }
                 }
         }
         changeCameraButton.setOnClickListener {
-            val camera = if (isUsingFrontCamera) back() else front()
+            val camera = if (cameraDirection == CameraDirection.FRONT) back() else front()
             foto.switchTo(camera, cameraConfiguration)
-            isUsingFrontCamera = !isUsingFrontCamera
+            cameraDirection = when(cameraDirection){
+                CameraDirection.BACK-> CameraDirection.FRONT
+                CameraDirection.FRONT->CameraDirection.BACK
+            }
+            //isUsingFrontCamera = !isUsingFrontCamera
+
         }
 
         tryAgainButton.setOnClickListener {
@@ -96,7 +102,7 @@ class MainActivity : AppCompatActivity() {
         val rotationCompensation = -rotationDegrees.toFloat()
         val source = bitmap
         val matrix = Matrix()
-        if (isUsingFrontCamera) matrix.preScale(1f, -1f)
+        if (cameraDirection == CameraDirection.FRONT) matrix.preScale(1f, -1f)
         matrix.postRotate(rotationCompensation)
         return Bitmap.createBitmap(source, 0,0, source.width, source.height, matrix, true)
 

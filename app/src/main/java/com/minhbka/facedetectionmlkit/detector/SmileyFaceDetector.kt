@@ -8,6 +8,7 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions.FAST
+import com.minhbka.facedetectionmlkit.CameraDirection
 import com.minhbka.facedetectionmlkit.graphic.SmileyFaceGraphic
 private const val TAG = "SmileyFaceDetector"
 class SmileyFaceDetector:FaceDetector{
@@ -20,7 +21,7 @@ class SmileyFaceDetector:FaceDetector{
     private val detector : FirebaseVisionFaceDetector = FirebaseVision.getInstance().getVisionFaceDetector(options)
 
 
-    override fun process(bitmap: Bitmap, callback: (Bitmap) -> Unit) {
+    override fun process(bitmap: Bitmap, callback: (Bitmap) -> Unit, cameraDirection: CameraDirection) {
         val fireImage = FirebaseVisionImage.fromBitmap(bitmap)
         detector.detectInImage(fireImage)
             .addOnSuccessListener {faces->
