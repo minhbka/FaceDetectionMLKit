@@ -1,5 +1,6 @@
 package com.minhbka.facedetectionmlkit.detector
 
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.util.Log
 import com.google.firebase.ml.vision.FirebaseVision
@@ -7,8 +8,10 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions
 import com.minhbka.facedetectionmlkit.graphic.BoxFacesGraphic
+import com.minhbka.facedetectionmlkit.graphic.TrollGraphic
+
 private const val TAG = "SimpleFaceDetector"
-class SimpleFaceDetector : FaceDetector {
+class SimpleFaceDetector(private val resources : Resources) : FaceDetector {
     private val options =  FirebaseVisionFaceDetectorOptions.Builder()
         .setPerformanceMode(FirebaseVisionFaceDetectorOptions.FAST)
         .build()
@@ -19,8 +22,9 @@ class SimpleFaceDetector : FaceDetector {
         val fireImage = FirebaseVisionImage.fromBitmap(bitmap)
         detector.detectInImage(fireImage)
             .addOnSuccessListener { faces->
-                val bitmapWithFace = BoxFacesGraphic.draw(bitmap,faces)
-                callback(bitmapWithFace)
+                //val bitmapWithFaces = BoxFacesGraphic.draw(bitmap,faces)
+                val bitmapWithFaces = TrollGraphic(resources).draw(bitmap, faces)
+                callback(bitmapWithFaces)
 
             }
             .addOnFailureListener { e->Log.e(TAG, "$e") }

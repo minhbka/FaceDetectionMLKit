@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.minhbka.facedetectionmlkit.detector.FaceDetector
 import com.minhbka.facedetectionmlkit.detector.SimpleFaceDetector
+import com.minhbka.facedetectionmlkit.detector.SmileyFaceDetector
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.fotoapparat.Fotoapparat
 import io.fotoapparat.configuration.CameraConfiguration
@@ -22,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var disposable: Disposable
     private lateinit var foto:Fotoapparat
     private var isUsingFrontCamera = true
-    private val detection = SimpleFaceDetector()
+    private lateinit var detection : FaceDetector
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +37,8 @@ class MainActivity : AppCompatActivity() {
             lensPosition = front(),
             cameraConfiguration = cameraConfiguration)
         requestPermissions()
+        detection = SmileyFaceDetector()
+        //detection = SimpleFaceDetector(resources)
         resultsGroup.visibility = View.GONE
     }
 
@@ -104,14 +108,18 @@ class MainActivity : AppCompatActivity() {
 private val cameraConfiguration = CameraConfiguration(
     pictureResolution = {
         filter {
-            it.width in 300..500
+            it.width in 500..800
         }.minBy { it.area }
 
     },
     previewResolution = highestResolution(),
     previewFpsRange = highestFps(),
     focusMode = firstAvailable(continuousFocusPicture(), autoFocus(), fixed()),
-    flashMode = firstAvailable(autoRedEye(), autoFlash(), torch(), off()),
+    flashMode = firstAvailable(
+        //autoRedEye(),
+        //autoFlash(),
+        //torch(),
+        off()),
     antiBandingMode = firstAvailable(auto(), hz50(), hz60(), none()),
     jpegQuality = manualJpegQuality(90)
 )
