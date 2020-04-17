@@ -8,13 +8,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import com.minhbka.facedetectionmlkit.R
 import com.minhbka.facedetectionmlkit.common.CameraDirection
 import com.minhbka.facedetectionmlkit.common.Effect
-import com.minhbka.facedetectionmlkit.video.frame.processor.FaceAlteringProcessor
-import com.minhbka.facedetectionmlkit.video.frame.processor.FaceContourOverlayDetectionProcessor
-import com.minhbka.facedetectionmlkit.video.frame.processor.FaceFastOverlayDetectionProcessor
-import com.minhbka.facedetectionmlkit.video.frame.processor.VisionImageProcessor
+import com.minhbka.facedetectionmlkit.video.frame.processor.*
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_real_time.*
@@ -30,6 +28,15 @@ class RealTimeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_real_time)
         rxPermissions = RxPermissions(this)
         requestPermissions()
+
+        cameraSourcePreviewView.setOnClickListener {
+            startSaving()
+        }
+    }
+
+    private fun startSaving() {
+        val pro = processor
+        if (pro is PhotoProducer) pro.activated = !pro.activated
     }
     override fun onResume() {
         super.onResume()
@@ -77,8 +84,27 @@ class RealTimeActivity : AppCompatActivity() {
         when (effect) {
             Effect.BLUR -> FaceAlteringProcessor(this)
             Effect.TROLL -> FaceFastOverlayDetectionProcessor(this, effect)
-            Effect.BOX -> FaceFastOverlayDetectionProcessor(this, effect)
+            Effect.BOX -> FaceSaveDetectionProcessor(this, watcher)
             Effect.OUTLINE -> FaceContourOverlayDetectionProcessor(effect)
+        }
+    }
+
+    private val availableToast: Toast by lazy {
+        Toast.makeText(this, "Start snapping!", Toast.LENGTH_LONG)
+    }
+
+    private val unavailableToast: Toast by lazy {
+        Toast.makeText(this, "No faces or too many faces detected!", Toast.LENGTH_LONG)
+    }
+
+    private object watcher: DetectionWatcher {
+
+        override fun onDetectionAvailabilityChanged(available: Boolean) {
+            println("Save availability $available")
+        }
+
+        override fun onFaceDetected() {
+            println("Face detected")
         }
     }
 
